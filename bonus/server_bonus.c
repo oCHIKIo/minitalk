@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.c                                           :+:      :+:    :+:   */
+/*   server_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/27 00:53:56 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/27 08:04:13 by bchiki           ###   ########.fr       */
+/*   Created: 2025/03/27 07:59:22 by bchiki            #+#    #+#             */
+/*   Updated: 2025/03/27 08:30:54 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "../minitalk.h"
 
-static void	reset_variables(unsigned char *c, int *bit_count, int *current_pid,
+static void	reset_state(unsigned char *c, int *bit_count, int *current_pid,
 		int new_pid)
 {
 	*c = 0;
@@ -20,17 +20,16 @@ static void	reset_variables(unsigned char *c, int *bit_count, int *current_pid,
 	*current_pid = new_pid;
 }
 
-static void	process_character(unsigned char *c, int *bit_count, int client_pid)
+static void	print_char(unsigned char c, int pid)
 {
-	if (*c == 0)
+	if (c == 0)
 	{
 		write(1, "\n", 1);
-		reset_variables(c, bit_count, &client_pid, 0);
+		ft_printf(YELLOW "Message received!\n" RESET);
+		kill(pid, SIGUSR1);
 	}
 	else
-		write(1, c, 1);
-	*c = 0;
-	*bit_count = 0;
+		write(1, &c, 1);
 }
 
 static void	handle_signal(int sig, siginfo_t *info, void *context)
@@ -40,14 +39,16 @@ static void	handle_signal(int sig, siginfo_t *info, void *context)
 	static int				current_pid = 0;
 
 	(void)context;
-	if (current_pid == 0)
-		current_pid = info->si_pid;
-	if (current_pid != info->si_pid)
-		reset_variables(&c, &bit_count, &current_pid, info->si_pid);
+	if (current_pid == 0 || current_pid != info->si_pid)
+		reset_state(&c, &bit_count, &current_pid, info->si_pid);
 	c |= (sig == SIGUSR2) << bit_count;
 	bit_count++;
 	if (bit_count == 8)
-		process_character(&c, &bit_count, current_pid);
+	{
+		print_char(c, info->si_pid);
+		c = 0;
+		bit_count = 0;
+	}
 	kill(info->si_pid, SIGUSR1);
 }
 
@@ -55,7 +56,7 @@ int	main(void)
 {
 	struct sigaction	sa;
 
-	ft_printf(YELLOW "Get Your Server PID: %d\n" RESET, getpid());
+	ft_printf(YELLOW "Server PID: %d\n" RESET, getpid());
 	sa.sa_sigaction = handle_signal;
 	sa.sa_flags = SA_SIGINFO;
 	sigemptyset(&sa.sa_mask);

@@ -1,23 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strlen.c                                        :+:      :+:    :+:   */
+/*   is_valid_pid.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/27 02:18:30 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/27 02:22:18 by bchiki           ###   ########.fr       */
+/*   Created: 2025/03/27 03:30:50 by bchiki            #+#    #+#             */
+/*   Updated: 2025/03/27 03:31:21 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int	ft_strlen(const char *str)
+int	is_valid_pid(const char *str)
 {
-	t_nbr	nbr;
-
-	nbr.x = 0;
-	while (str[nbr.x])
-		nbr.x++;
-	return (nbr.x);
+	if (!str || !*str)
+		return (0);
+	while (*str)
+	{
+		if (!ft_isdigit(*str))
+			return (0);
+		str++;
+	}
+	return (1);
 }
