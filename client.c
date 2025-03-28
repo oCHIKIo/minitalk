@@ -6,13 +6,13 @@
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/27 00:53:47 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/27 08:08:47 by bchiki           ###   ########.fr       */
+/*   Updated: 2025/03/28 18:23:33 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-static volatile sig_atomic_t	g_ack_received = 0;
+static int g_ack_received = 0;
 
 static void	ack_handler(int sig)
 {
@@ -26,9 +26,21 @@ static void	send_bit(int pid, int bit)
 
 	g_ack_received = 0;
 	if (bit)
-		kill(pid, SIGUSR2);
+	{
+		if (kill(pid, SIGUSR2) == -1)
+		{
+			write(2, "Error: kill failed\n", 19);
+			exit(1);
+		}
+	}
 	else
-		kill(pid, SIGUSR1);
+	{
+		if (kill(pid, SIGUSR1) == -1)
+		{
+			write(2, "Error: kill failed\n", 19);
+			exit(1);
+		}
+	}
 	timeout = 1000;
 	while (!g_ack_received && timeout-- > 0)
 		usleep(1);
@@ -62,7 +74,11 @@ static int	init_client(int argc, char **argv, int *pid, char **msg)
 	sa.sa_handler = ack_handler;
 	sa.sa_flags = 0;
 	sigemptyset(&sa.sa_mask);
-	sigaction(SIGUSR1, &sa, NULL);
+	if (sigaction(SIGUSR1, &sa, NULL) == -1)
+	{
+		write(2, "Error: sigaction failed\n", 24);
+		exit(1);
+	}
 	*pid = ft_atoi(argv[1]);
 	*msg = argv[2];
 	return (1);

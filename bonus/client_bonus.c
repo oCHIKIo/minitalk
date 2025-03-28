@@ -6,13 +6,13 @@
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/27 07:59:12 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/27 08:18:03 by bchiki           ###   ########.fr       */
+/*   Updated: 2025/03/28 17:28:26 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minitalk.h"
 
-static volatile sig_atomic_t	g_ack_received = 0;
+static int g_ack_received = 0;
 
 static void	ack_handler(int sig)
 {

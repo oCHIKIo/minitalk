@@ -6,7 +6,7 @@
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/27 00:53:56 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/27 08:04:13 by bchiki           ###   ########.fr       */
+/*   Updated: 2025/03/28 18:24:28 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,18 +50,27 @@ static void	handle_signal(int sig, siginfo_t *info, void *context)
 		process_character(&c, &bit_count, current_pid);
 	kill(info->si_pid, SIGUSR1);
 }
-
-int	main(void)
+int main(void) 
 {
-	struct sigaction	sa;
+    struct sigaction sa;
 
-	ft_printf(YELLOW "Get Your Server PID: %d\n" RESET, getpid());
-	sa.sa_sigaction = handle_signal;
-	sa.sa_flags = SA_SIGINFO;
-	sigemptyset(&sa.sa_mask);
-	sigaction(SIGUSR1, &sa, NULL);
-	sigaction(SIGUSR2, &sa, NULL);
-	while (1)
-		pause();
-	return (0);
+    sa.sa_sigaction = handle_signal;
+    sa.sa_flags = SA_SIGINFO;
+    sigemptyset(&sa.sa_mask);
+    if (sigaction(SIGUSR1, &sa, NULL) == -1) 
+    {
+        write(2, RED "Error: sigaction for SIGUSR1 failed\n" RESET, 
+             ft_strlen(RED "Error: sigaction for SIGUSR1 failed\n" RESET));
+        exit(1);
+    }
+    if (sigaction(SIGUSR2, &sa, NULL) == -1) 
+    {
+        write(2, RED "Error: sigaction for SIGUSR2 failed\n" RESET, 
+             ft_strlen(RED "Error: sigaction for SIGUSR2 failed\n" RESET));
+        exit(1);
+    }
+    ft_printf(YELLOW "Get Your Server PID: %d\n" RESET, getpid());
+    while (1)
+        pause();
+    return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/27 07:59:22 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/27 08:30:54 by bchiki           ###   ########.fr       */
+/*   Updated: 2025/03/28 18:01:48 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static void	print_char(unsigned char c, int pid)
 	if (c == 0)
 	{
 		write(1, "\n", 1);
-		ft_printf(YELLOW "Message received!\n" RESET);
+		ft_printf(YELLOW "Message received! :)\n" RESET);
 		kill(pid, SIGUSR1);
 	}
 	else
@@ -56,12 +56,12 @@ int	main(void)
 {
 	struct sigaction	sa;
 
-	ft_printf(YELLOW "Server PID: %d\n" RESET, getpid());
 	sa.sa_sigaction = handle_signal;
 	sa.sa_flags = SA_SIGINFO;
 	sigemptyset(&sa.sa_mask);
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
+	ft_printf(YELLOW "Server PID: %d\n" RESET, getpid());
 	while (1)
 		pause();
 	return (0);
