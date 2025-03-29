@@ -6,13 +6,13 @@
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/27 00:53:47 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/28 18:23:33 by bchiki           ###   ########.fr       */
+/*   Updated: 2025/03/29 00:20:01 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-static int g_ack_received = 0;
+static int	g_ack_received = 0;
 
 static void	ack_handler(int sig)
 {
@@ -59,21 +59,16 @@ static int	init_client(int argc, char **argv, int *pid, char **msg)
 {
 	struct sigaction	sa;
 
-	if (argc != 3)
-	{
-		write(2, RED "Error: ./client <PID> <message>\n" RESET,
-			ft_strlen(RED "Error: ./client <PID> <message>\n" RESET));
+	if (!validate_args(argc, argv))
 		return (0);
-	}
-	if (!is_valid_pid(argv[1]))
-	{
-		write(2, RED "Invalid PID Format\n" RESET,
-			ft_strlen(RED "Invalid PID Format\n" RESET));
-		return (0);
-	}
 	sa.sa_handler = ack_handler;
 	sa.sa_flags = 0;
-	sigemptyset(&sa.sa_mask);
+	if (sigemptyset(&sa.sa_mask) == -1)
+	{
+		write(2, RED "Error: sigemptyset failed\n" RESET,
+			ft_strlen(RED "Error: sigemptyset failed\n" RESET));
+		exit(1);
+	}
 	if (sigaction(SIGUSR1, &sa, NULL) == -1)
 	{
 		write(2, "Error: sigaction failed\n", 24);

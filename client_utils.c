@@ -1,30 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minitalk.h                                         :+:      :+:    :+:   */
+/*   client_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/27 01:07:56 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/29 00:07:00 by bchiki           ###   ########.fr       */
+/*   Created: 2025/03/28 23:33:54 by bchiki            #+#    #+#             */
+/*   Updated: 2025/03/29 00:06:55 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINITALK_H
-# define MINITALK_H
+#include "minitalk.h"
 
-# define RESET "\033[0m"
-# define RED "\033[1;31m"
-# define CYAN "\033[1;36m"
-# define YELLOW "\033[0;93m"
-
-# include "not_your_libft/libft.h"
-# include "not_your_printf/ft_printf.h"
-# include <signal.h>
-# include <stdio.h>
-# include <unistd.h>
-
-int	validate_args(int argc, char **argv);
-int	check_sigemptyset(struct sigaction *sa);
-
-#endif
+int	validate_args(int argc, char **argv)
+{
+	if (argc != 3)
+	{
+		write(2, RED "Error: ./client <PID> <message>\n" RESET,
+			ft_strlen(RED "Error: ./client <PID> <message>\n" RESET));
+		return (0);
+	}
+	if (!is_valid_pid(argv[1]))
+	{
+		write(2, RED "Invalid PID Format\n" RESET,
+			ft_strlen(RED "Invalid PID Format\n" RESET));
+		return (0);
+	}
+	return (1);
+}

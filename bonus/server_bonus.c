@@ -6,7 +6,7 @@
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/27 07:59:22 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/28 18:01:48 by bchiki           ###   ########.fr       */
+/*   Updated: 2025/03/28 23:57:37 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,12 @@ static void	print_char(unsigned char c, int pid)
 	{
 		write(1, "\n", 1);
 		ft_printf(YELLOW "Message received! :)\n" RESET);
-		kill(pid, SIGUSR1);
+		if (kill(pid, SIGUSR1) == -1)
+		{
+			write(2, RED "Error: kill failed\n" RESET,
+				ft_strlen(RED "Error: kill failed\n" RESET));
+			exit(1);
+		}
 	}
 	else
 		write(1, &c, 1);
@@ -49,7 +54,8 @@ static void	handle_signal(int sig, siginfo_t *info, void *context)
 		c = 0;
 		bit_count = 0;
 	}
-	kill(info->si_pid, SIGUSR1);
+	if (kill(info->si_pid, SIGUSR1) == -1)
+		exit(1);
 }
 
 int	main(void)
@@ -58,10 +64,20 @@ int	main(void)
 
 	sa.sa_sigaction = handle_signal;
 	sa.sa_flags = SA_SIGINFO;
-	sigemptyset(&sa.sa_mask);
-	sigaction(SIGUSR1, &sa, NULL);
-	sigaction(SIGUSR2, &sa, NULL);
-	ft_printf(YELLOW "Server PID: %d\n" RESET, getpid());
+	if (sigemptyset(&sa.sa_mask) == -1)
+	{
+		write(2, RED "Error: sigemptyset failed\n" RESET,
+			ft_strlen(RED "Error: sigemptyset failed\n" RESET));
+		exit(1);
+	}
+	if (sigaction(SIGUSR1, &sa, NULL) == -1 || sigaction(SIGUSR2, &sa, NULL)
+		== -1)
+	{
+		write(2, RED "Error: sigaction failed\n" RESET,
+			ft_strlen(RED "Error: sigaction failed\n" RESET));
+		exit(1);
+	}
+	ft_printf(YELLOW "Get Your Server PID: %d\n" RESET, getpid());
 	while (1)
 		pause();
 	return (0);

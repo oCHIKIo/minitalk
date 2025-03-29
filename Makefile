@@ -1,80 +1,58 @@
-NAME        = minitalk
-SERVER      = server
-CLIENT      = client
-BONUS_SERVER = server_bonus
-BONUS_CLIENT = client_bonus
-CC          = cc
-CFLAGS      = -Wall -Wextra -Werror
-INCLUDES    = -Iincludes -Inot_your_printf/includes -Inot_your_libft
+CC = cc
+CFLAGS = -Wall -Wextra -Werror
+CLIENT = client
+SERVER = server
+CLIENT_BONUS = client_bonus
+SERVER_BONUS = server_bonus
+CLIENT_SRCS = client.c client_utils.c
+SERVER_SRCS = server.c
+CLIENT_BONUS_SRCS = bonus/client_bonus.c bonus/client_bonus_utils.c
+SERVER_BONUS_SRCS = bonus/server_bonus.c
+CLIENT_OBJS = $(CLIENT_SRCS:.c=.o)
+SERVER_OBJS = $(SERVER_SRCS:.c=.o)
+CLIENT_BONUS_OBJS = $(CLIENT_BONUS_SRCS:.c=.o)
+SERVER_BONUS_OBJS = $(SERVER_BONUS_SRCS:.c=.o)
+LIBFT_PATH = not_your_libft
+PRINTF_PATH = not_your_printf
+LIBFT = $(LIBFT_PATH)/libft.a
+PRINTF = $(PRINTF_PATH)/libftprintf.a
+INCLUDES = -I. -I$(LIBFT_PATH) -I$(PRINTF_PATH)
 
-SRC_SERVER  = server.c
-SRC_CLIENT  = client.c
-BONUS_SRC_SERVER = bonus/server_bonus.c
-BONUS_SRC_CLIENT = bonus/client_bonus.c
-SRC_LIBFT   = not_your_libft/ft_atoi.c \
-              not_your_libft/ft_isdigit.c \
-              not_your_libft/ft_strlen.c \
-			  not_your_libft/is_valid_pid.c 
-
-OBJ_LIBFT   = $(SRC_LIBFT:.c=.o)
-
-PRINTF_DIR  = not_your_printf
-PRINTF_LIB  = $(PRINTF_DIR)/libftprintf.a
-LIBFT       = not_your_libft/libft.a
-
-WOLF        = 🐺
-GREEN_WOLF  = \033[1;32m$(WOLF)
-RED_WOLF    = \033[1;31m$(WOLF)
-YELLOW_WOLF = \033[1;33m$(WOLF)
-BLUE_WOLF   = \033[1;34m$(WOLF)
-RESET       = \033[0m
-
-# Rules
 all: $(SERVER) $(CLIENT)
 
-$(LIBFT): $(OBJ_LIBFT)
-	@ar rcs $@ $^
+bonus: $(SERVER_BONUS) $(CLIENT_BONUS)
 
-$(PRINTF_LIB):
-	@make -sC $(PRINTF_DIR)
+$(LIBFT):
+	@make -s -C $(LIBFT_PATH)
 
-$(OBJ_LIBFT): %.o: %.c
+$(PRINTF):
+	@make -s -C $(PRINTF_PATH)
+
+$(SERVER): $(SERVER_OBJS) $(LIBFT) $(PRINTF)
+	@$(CC) $(CFLAGS) $(SERVER_OBJS) -L$(LIBFT_PATH) -L$(PRINTF_PATH) -lft -lftprintf -o $(SERVER)
+
+$(CLIENT): $(CLIENT_OBJS) $(LIBFT) $(PRINTF)
+	@$(CC) $(CFLAGS) $(CLIENT_OBJS) -L$(LIBFT_PATH) -L$(PRINTF_PATH) -lft -lftprintf -o $(CLIENT)
+
+$(SERVER_BONUS): $(SERVER_BONUS_OBJS) $(LIBFT) $(PRINTF)
+	@$(CC) $(CFLAGS) $(SERVER_BONUS_OBJS) -L$(LIBFT_PATH) -L$(PRINTF_PATH) -lft -lftprintf -o $(SERVER_BONUS)
+
+$(CLIENT_BONUS): $(CLIENT_BONUS_OBJS) $(LIBFT) $(PRINTF)
+	@$(CC) $(CFLAGS) $(CLIENT_BONUS_OBJS) -L$(LIBFT_PATH) -L$(PRINTF_PATH) -lft -lftprintf -o $(CLIENT_BONUS)
+
+%.o: %.c
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-$(SERVER): $(SRC_SERVER) $(LIBFT) $(PRINTF_LIB)
-	@echo "$(GREEN_WOLF) Compiling server...$(RESET)"
-	@$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@ -L$(PRINTF_DIR) -lftprintf -Lnot_your_libft -lft
-	@echo "$(GREEN_WOLF) Server Ready! $(RESET)"
-
-$(CLIENT): $(SRC_CLIENT) $(LIBFT) $(PRINTF_LIB)
-	@echo "$(GREEN_WOLF) Compiling client...$(RESET)"
-	@$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@ -L$(PRINTF_DIR) -lftprintf -Lnot_your_libft -lft
-	@echo "$(GREEN_WOLF) Client Ready! $(RESET)"
-
-bonus: $(BONUS_SERVER) $(BONUS_CLIENT)
-
-$(BONUS_SERVER): $(BONUS_SRC_SERVER) $(LIBFT) $(PRINTF_LIB)
-	@echo "$(GREEN_WOLF) Compiling bonus server...$(RESET)"
-	@$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@ -L$(PRINTF_DIR) -lftprintf -Lnot_your_libft -lft
-	@echo "$(GREEN_WOLF) Bonus Server Ready! $(RESET)"
-
-$(BONUS_CLIENT): $(BONUS_SRC_CLIENT) $(LIBFT) $(PRINTF_LIB)
-	@echo "$(GREEN_WOLF) Compiling bonus client...$(RESET)"
-	@$(CC) $(CFLAGS) $(INCLUDES) $^ -o $@ -L$(PRINTF_DIR) -lftprintf -Lnot_your_libft -lft
-	@echo "$(GREEN_WOLF) Bonus Client Ready! $(RESET)"
-
 clean:
-	@echo "$(RED_WOLF) Cleaning object files...$(RESET)"
-	@make -sC $(PRINTF_DIR) clean
-	@rm -f $(OBJ_LIBFT) $(LIBFT)
-	@echo "$(RED_WOLF) Cleaned Successfully! $(RESET)"
+	@make -s -C $(LIBFT_PATH) clean
+	@make -s -C $(PRINTF_PATH) clean
+	@rm -f $(CLIENT_OBJS) $(SERVER_OBJS) $(CLIENT_BONUS_OBJS) $(SERVER_BONUS_OBJS)
 
 fclean: clean
-	@echo "$(YELLOW_WOLF) Removing executables...$(RESET)"
-	@rm -f $(SERVER) $(CLIENT) $(BONUS_SERVER) $(BONUS_CLIENT)
-	@echo "$(YELLOW_WOLF) Force Cleaned Successfully! $(RESET)"
+	@make -s -C $(LIBFT_PATH) fclean
+	@make -s -C $(PRINTF_PATH) fclean
+	@rm -f $(CLIENT) $(SERVER) $(CLIENT_BONUS) $(SERVER_BONUS)
 
 re: fclean all
-	@echo "$(BLUE_WOLF) Rebuilt Successfully! $(RESET)"
 
-.PHONY: all clean fclean re bonus
+.PHONY: all bonus clean fclean re

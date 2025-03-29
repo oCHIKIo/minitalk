@@ -6,13 +6,13 @@
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/27 07:59:12 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/28 17:28:26 by bchiki           ###   ########.fr       */
+/*   Updated: 2025/03/29 00:01:19 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minitalk.h"
 
-static int g_ack_received = 0;
+static int	g_ack_received = 0;
 
 static void	ack_handler(int sig)
 {
@@ -24,12 +24,24 @@ static void	send_bit(int pid, int bit)
 {
 	int	timeout;
 
-	timeout = 1000;
 	g_ack_received = 0;
 	if (bit)
-		kill(pid, SIGUSR2);
+	{
+		if (kill(pid, SIGUSR2) == -1)
+		{
+			write(2, "Error: kill failed\n", 19);
+			exit(1);
+		}
+	}
 	else
-		kill(pid, SIGUSR1);
+	{
+		if (kill(pid, SIGUSR1) == -1)
+		{
+			write(2, "Error: kill failed\n", 19);
+			exit(1);
+		}
+	}
+	timeout = 1000;
 	while (!g_ack_received && timeout-- > 0)
 		usleep(1);
 }
@@ -55,8 +67,13 @@ static int	init_client(int argc, char **argv, struct sigaction *sa, int *pid)
 				ft_strlen(RED "Invalid PID Format\n" RESET)), 1);
 	sa->sa_handler = ack_handler;
 	sa->sa_flags = 0;
-	sigemptyset(&sa->sa_mask);
-	sigaction(SIGUSR1, sa, NULL);
+	check_sigemptyset(sa);
+	if (sigaction(SIGUSR1, sa, NULL) == -1)
+	{
+		write(2, RED "Error: sigaction for SIGUSR1 failed\n" RESET,
+			ft_strlen(RED "Error: sigaction for SIGUSR1 failed\n" RESET));
+		exit(1);
+	}
 	*pid = ft_atoi(argv[1]);
 	msg = argv[2];
 	return (0);

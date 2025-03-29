@@ -1,30 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minitalk.h                                         :+:      :+:    :+:   */
+/*   client_bonus_utils.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bchiki <bchiki@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/27 01:07:56 by bchiki            #+#    #+#             */
-/*   Updated: 2025/03/29 00:07:00 by bchiki           ###   ########.fr       */
+/*   Created: 2025/03/28 23:54:03 by bchiki            #+#    #+#             */
+/*   Updated: 2025/03/29 00:01:27 by bchiki           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINITALK_H
-# define MINITALK_H
+#include "../minitalk.h"
 
-# define RESET "\033[0m"
-# define RED "\033[1;31m"
-# define CYAN "\033[1;36m"
-# define YELLOW "\033[0;93m"
-
-# include "not_your_libft/libft.h"
-# include "not_your_printf/ft_printf.h"
-# include <signal.h>
-# include <stdio.h>
-# include <unistd.h>
-
-int	validate_args(int argc, char **argv);
-int	check_sigemptyset(struct sigaction *sa);
-
-#endif
+int	check_sigemptyset(struct sigaction *sa)
+{
+	if (sigemptyset(&sa->sa_mask) == -1)
+	{
+		write(2, RED "Error: sigemptyset failed\n" RESET,
+			ft_strlen(RED "Error: sigemptyset failed\n" RESET));
+		exit(1);
+	}
+	return (0);
+}
